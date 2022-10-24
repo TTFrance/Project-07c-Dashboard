@@ -10,7 +10,6 @@ import numpy as np
 import requests
 import json
 import pandas as pd
-import plotly.figure_factory as ff
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
