@@ -6,3 +6,4 @@ pandas
 requests
 seaborn
 streamlit
+lightgbm
