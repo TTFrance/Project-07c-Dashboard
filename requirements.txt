@@ -2,7 +2,6 @@ joblib
 jsonschema
 matplotlib
 numpy
-os
 pandas
 requests
 seaborn
