@@ -6,16 +6,16 @@ Here's our first attempt at using data to create a table:
 # cd C:\Users\adam_\Desktop\OC\Project 07\Project-07c-Dashboard
 # streamlit run firstslapp.py
 
-import numpy as np
-import requests
-import json
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import joblib
+import json
+import matplotlib.pyplot as plt
+import numpy as np
 import os
-
+import pandas as pd
+import requests
+import seaborn as sns
 import streamlit as st
+
 st.set_page_config(layout="wide")
 
 # GRAPH SETTINGS
