@@ -43,6 +43,8 @@ with left_column:
     
 # RIGHT COLUMN
 with right_column:
+    
+
     chosen = st.radio(
         'Sorting hat',
         ("Gryffindor", "Ravenclaw", "Hufflepuff", "Slytherin"))
