@@ -1,5 +1,5 @@
 joblib
-json
+jsonschema
 matplotlib
 numpy
 os
