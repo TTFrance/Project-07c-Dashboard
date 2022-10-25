@@ -150,9 +150,9 @@ with tab1:
         # GLOBAL
         st.subheader('Global Feature Importance')
 
-        #st.set_option('deprecation.showPyplotGlobalUse', False)
         #st_shap.st_shap(shap.summary_plot(shap_values[1], X, show = False),height=600,width=600)
         
+        st.set_option('deprecation.showPyplotGlobalUse', False)
         fig = shap.summary_plot(shap_values[1], X, show = False)
         st.pyplot(fig, matplotlib=True)
         
