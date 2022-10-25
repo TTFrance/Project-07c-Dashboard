@@ -17,9 +17,13 @@ import seaborn as sns
 import shap
 import streamlit as st
 import streamlit_shap as st_shap
+import sys
+
 
 # import streamlit.components.v1 as components
 st.set_page_config(layout="wide")
+
+sys.path.append(".")
 
 # GRAPH SETTINGS
 plt.style.use("dark_background")
