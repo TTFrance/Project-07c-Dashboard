@@ -1,7 +1,7 @@
 dill
 joblib
 jsonschema
-matplotlib
+matplotlib==3.4.3
 numpy
 pandas
 requests
