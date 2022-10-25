@@ -7,4 +7,4 @@ requests
 seaborn
 streamlit
 lightgbm
-shap
+shap==0.30.1
