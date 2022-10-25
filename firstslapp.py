@@ -14,12 +14,17 @@ import os
 import pandas as pd
 import requests
 import seaborn as sns
+import shap
 import streamlit as st
+import streamlit_shap as st_shap
 
+# import streamlit.components.v1 as components
 st.set_page_config(layout="wide")
 
 # GRAPH SETTINGS
 plt.style.use("dark_background")
+plt.style.use('default')
+plt.style.use('Solarize_Light2')
 
 # CONSTANTS
 # base API url
@@ -117,17 +122,42 @@ with tab1:
     # END TAB1 LEFT COLUMN
 
     with tab1_right_column:
-        st.subheader('Feature Importances')
-        features = pd.DataFrame(columns=['name','importance'])
-        importance = model.feature_importances_
-        for i,v in enumerate(importance):
-            feature_name = model.feature_name_[i]
-            features.loc[len(features.index)] = [feature_name,v] 
-        features = features.sort_values('importance', ascending=False).head(15) #.set_index('name')
+        
+        #features = pd.DataFrame(columns=['name','importance'])
+        #importance = model.feature_importances_
+        #for i,v in enumerate(importance):
+        #    feature_name = model.feature_name_[i]
+        #    features.loc[len(features.index)] = [feature_name,v] 
+        #features = features.sort_values('importance', ascending=False).head(15) #.set_index('name')
+        #fig, ax = plt.subplots()
+        #ax.barh(data=features.sort_values('importance'),y='name',width='importance')
+        #fig
 
-        fig, ax = plt.subplots()
-        ax.barh(data=features.sort_values('importance'),y='name',width='importance')
-        fig
+        # SHAP
+        X = df.drop(columns=['TARGET'])
+        explainer = shap.TreeExplainer(model)
+        shap_values = explainer.shap_values(X)
+
+        # LOCAL EXPLANATION
+        # STREAMLIT_SHAP
+        st.subheader('Local Explanation')
+        st_shap.st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0,:], X.iloc[0,:]))
+
+        # GLOBAL
+        st.subheader('Global Feature Importance')
+        fig = shap.summary_plot(shap_values[1], X, show = False)
+        st.set_option('deprecation.showPyplotGlobalUse', False)
+        st.pyplot(fig, matplotlib=True)
+        #st_shap(shap.summary_plot(shap_values[1], X, show = False))
+
+
+        # fig = shap.summary_plot(shap_values, features=X, feature_names=X.columns)
+        # st.pyplot(fig, matplotlib=False)
+
+
+        #shap.force_plot(explainer.expected_value[1], shap_values[1][0,:], X.iloc[0,:])
+        #plt.show()
+        # st.pyplot(fig, matplotlib=False)
 
     # END TAB1 RIGHT COLUMN
 
