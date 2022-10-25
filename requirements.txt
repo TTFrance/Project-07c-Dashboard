@@ -1,4 +1,3 @@
-shap==0.30.1
 pickle
 joblib
 jsonschema
@@ -10,3 +9,4 @@ seaborn
 streamlit
 lightgbm
 
+shap==0.30.1
