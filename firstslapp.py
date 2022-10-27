@@ -18,20 +18,20 @@ import shap
 import streamlit as st
 import streamlit_shap as st_shap
 import sys
-
-
 # import streamlit.components.v1 as components
+
+# STREAMLIT WIDTH CONFIG
 st.set_page_config(layout="wide")
 
+# PATH TO BE ABLE TO PICK UP ENV VARIABLE 'OCP7_API_URL'
 sys.path.append(".")
 
 # GRAPH SETTINGS
+plt.style.use('Solarize_Light2')
 plt.style.use("dark_background")
 plt.style.use('default')
-plt.style.use('Solarize_Light2')
 
-# CONSTANTS
-# base API url
+# URL FOR API, FROM ENV VARIABLE 'OCP7_API_URL'
 # base_api_url = "https://ttfrance-firstapp.herokuapp.com/" # live
 # base_api_url = "http://127.0.0.1:8000/" # local
 base_api_url = os.environ['OCP7_API_URL']
@@ -42,6 +42,15 @@ model = joblib.load('model/best_LGB_10k_Undersampled_BestParams.pkl')
 # url to make prediction
 predict_url_slug = base_api_url + "predict/"
 
+# DATA FOR GRAPHING
+df = pd.read_pickle('data/client_data_api_dashboard_1k.pkl')
+
+# LOAD CURVES FOR PROFIT / LOSS
+CURVES = pd.read_pickle('data/curves.pkl')
+
+# ANNUITY AMOUNTS
+df_amt_annuity = pd.read_pickle('data/df_amt_annuity.pkl')
+
 # INITIALISATION
 # init the client ids available
 # response = requests.get(base_api_url + "getids/")
@@ -51,8 +60,6 @@ predict_url_slug = base_api_url + "predict/"
 #     lst_ids.append(str(x))
 # arr_ids = np.array(lst_ids)
 
-# DATA FOR GRAPHING
-df = pd.read_pickle('data/client_data_api_dashboard_1k.pkl')
 
 # TEST
 dictionary = {'A: Low': ['226060', '310013'], 'B: Medium': ['324973', '449031'], 'C: High': ['328692', '392503']}
@@ -94,6 +101,7 @@ DAYS_BIRTH = df.loc[[int(client_id)]]['DAYS_BIRTH'].values[0]
 DAYS_EMPLOYED_PERC = df.loc[[int(client_id)]]['DAYS_EMPLOYED_PERC'].values[0]
 
 AMT_CREDIT = df.loc[[int(client_id)]]['AMT_CREDIT'].values[0]
+AMT_ANNUITY = df_amt_annuity[df_amt_annuity.index == int(client_id)]['AMT_ANNUITY'].values[0]
 
 PA_DAYS_PROLONG_PCT__mean = df.loc[[int(client_id)]]['PA_DAYS_PROLONG_PCT__mean'].values[0]
 PA_DAYS_TOT_DURATION__mean = df.loc[[int(client_id)]]['PA_DAYS_TOT_DURATION__mean'].values[0]
@@ -104,25 +112,34 @@ Bur_CB_DAYS_CREDIT_ENDDATE__max = df.loc[[int(client_id)]]['Bur_CB_DAYS_CREDIT_E
 NAME_EDUCATION_TYPE_Highereducation = df.loc[[int(client_id)]]['NAME_EDUCATION_TYPE_Highereducation'].values[0]
 NAME_FAMILY_STATUS_Married = df.loc[[int(client_id)]]['NAME_FAMILY_STATUS_Married'].values[0]
 
+# CALCULATE LOSS/GAIN CURVE
+W0 = AMT_ANNUITY
+W1 = AMT_CREDIT
+CURVES['EARNED']     = W0*CURVES.TN
+CURVES['NOT_EARNED'] = W0*CURVES.FP
+CURVES['LOST']       = W1*CURVES.FN
+CURVES['GAIN']       = CURVES.EARNED - CURVES.LOST
+CURVES['MAX_GAIN']   = CURVES.EARNED + CURVES.NOT_EARNED
+
 with tab1:
     tab1_left_column, tab1_right_column = st.columns([1, 2], gap="small")
     with tab1_left_column:
         st.subheader('Basic Details')
-        'Default Probability', default_proba, "%"
-        'AGE:', str(round(abs(DAYS_BIRTH)/365.25,0)),'years'
-        'DAYS_EMPLOYED_PERC', str(round(DAYS_EMPLOYED_PERC,2)),'%'
+        'Default Probability', default_proba*100, "%"
+        st.markdown('Age: **'+ str(round(abs(DAYS_BIRTH)/365.25,0)) + '** Years')
+        st.markdown('% Days Employed: **'+ str(round(DAYS_EMPLOYED_PERC,2)) + '**')
         if CODE_GENDER_F == 1:
-            "SEX:", "Female"
+            st.markdown('Sex: **'+ 'Female' + '**')
         else:
-            "SEX:","Male"
+            st.markdown('Sex: **'+ 'Male' + '**')
         if NAME_EDUCATION_TYPE_Highereducation == 1:
-            "Higher Education:", "Yes"
+            st.markdown('Higher Education: **'+ 'Yes' + '**')
         else:
-            "Higher Education:", "No"
+            st.markdown('Higher Education: **'+ 'No' + '**')
         if NAME_FAMILY_STATUS_Married == 1:
-            "Marital Status:", "Married"
+            st.markdown('Marital Status: **'+ 'Married' + '**')
         else:
-            "Marital Status:", "Not Married"
+            st.markdown('Marital Status: **'+ 'Not Married' + '**')
     # END TAB1 LEFT COLUMN
 
     with tab1_right_column:
@@ -137,35 +154,34 @@ with tab1:
         #ax.barh(data=features.sort_values('importance'),y='name',width='importance')
         #fig
 
+        # -----------------
         # SHAP
+        # DO NOT TOUCH THIS
+        # DO NOT TOUCH THIS
+        # DO NOT TOUCH THIS
         X = df.drop(columns=['TARGET'])
         explainer = shap.TreeExplainer(model)
         shap_values = explainer.shap_values(X)
-
         # LOCAL EXPLANATION
         # STREAMLIT_SHAP
         st.subheader('Local Explanation')
         st_shap.st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0,:], X.iloc[0,:]))
-
-        # GLOBAL
+        # GLOBAL EXPLANATION
         st.subheader('Global Feature Importance')
-
-        #st_shap.st_shap(shap.summary_plot(shap_values[1], X, show = False),height=600,width=600)
-        
         st.set_option('deprecation.showPyplotGlobalUse', False)
         fig = shap.summary_plot(shap_values[1], X, show = False)
         st.pyplot(fig, matplotlib=True)
-        
-        #st_shap(shap.summary_plot(shap_values[1], X, show = False))
+        # DO NOT TOUCH THIS
+        # DO NOT TOUCH THIS
+        # DO NOT TOUCH THIS
+        # -----------------
 
-
-        # fig = shap.summary_plot(shap_values, features=X, feature_names=X.columns)
-        # st.pyplot(fig, matplotlib=False)
-
-
-        #shap.force_plot(explainer.expected_value[1], shap_values[1][0,:], X.iloc[0,:])
-        #plt.show()
-        # st.pyplot(fig, matplotlib=False)
+        # GAIN / LOSS CURVES GRAPH
+        st.subheader('Gain / Loss Curves')
+        fig, ax = plt.subplots(figsize =(10, 6))
+        CURVES.plot(ax=ax, x='threshold', y=['EARNED', 'LOST'])
+        plt.axvline(x=default_proba, color='red', linestyle='--', linewidth=2, alpha=0.5)
+        st.pyplot(fig)
 
     # END TAB1 RIGHT COLUMN
 
@@ -194,6 +210,8 @@ with tab2:
         sns.kdeplot(data=df, x="EXT_SOURCE_3", fill=True, color='orange').set(title='Dist EXT_SOURCE_3')
         plt.axvline(x=EXT_SOURCE_3, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
+
+
     # END TAB2 LEFT COLUMN
 
     # RIGHT COLUMN
