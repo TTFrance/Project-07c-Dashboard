@@ -36,10 +36,10 @@ plt.style.use('default')
 # base_api_url = "http://127.0.0.1:8000/" # local
 base_api_url = os.environ['OCP7_API_URL']
 
-# load the model
+# LOAD THE PREDICTION MODEL (NOT USED HERE FOR A SINGLE PREDICTION)
 model = joblib.load('model/best_LGB_10k_Undersampled_BestParams.pkl')
 
-# url to make prediction
+# URI FOR PREDICTION API
 predict_url_slug = base_api_url + "predict/"
 
 # DATA FOR GRAPHING
@@ -51,23 +51,16 @@ CURVES = pd.read_pickle('data/curves.pkl')
 # ANNUITY AMOUNTS
 df_amt_annuity = pd.read_pickle('data/df_amt_annuity.pkl')
 
-# INITIALISATION
-# init the client ids available
-# response = requests.get(base_api_url + "getids/")
-
-# lst_ids = []
-# for x in response.json(): 
-#     lst_ids.append(str(x))
-# arr_ids = np.array(lst_ids)
-
-
 # TEST
 dictionary = {'A: Low': ['226060', '310013'], 'B: Medium': ['324973', '449031'], 'C: High': ['328692', '392503']}
 
-
+# CREATE THE SIDEBAR
 sidebar = st.sidebar
+
+# CREATE MAIN TABS
 tab1, tab2, tab3 = st.tabs(["Client Basic Info", "Main Features", "Other Features"])
 
+# SIDEBAR
 with sidebar:
     st.title('Client Loan Default')
     #client_id = st.sidebar.selectbox('Client ID',arr_ids)
@@ -96,13 +89,10 @@ EXT_SOURCE_3 = df.loc[[int(client_id)]]['EXT_SOURCE_3'].values[0]
 PAYMENT_RATE = df.loc[[int(client_id)]]['PAYMENT_RATE'].values[0]
 CODE_GENDER_F = df.loc[[int(client_id)]]['CODE_GENDER_F'].values[0]
 PA_PrLI_DELAY_DAYS_INSTALMENT__max__max = df.loc[[int(client_id)]]['PA_PrLI_DELAY_DAYS_INSTALMENT__max__max'].values[0]
-
 DAYS_BIRTH = df.loc[[int(client_id)]]['DAYS_BIRTH'].values[0]
 DAYS_EMPLOYED_PERC = df.loc[[int(client_id)]]['DAYS_EMPLOYED_PERC'].values[0]
-
 AMT_CREDIT = df.loc[[int(client_id)]]['AMT_CREDIT'].values[0]
 AMT_ANNUITY = df_amt_annuity[df_amt_annuity.index == int(client_id)]['AMT_ANNUITY'].values[0]
-
 PA_DAYS_PROLONG_PCT__mean = df.loc[[int(client_id)]]['PA_DAYS_PROLONG_PCT__mean'].values[0]
 PA_DAYS_TOT_DURATION__mean = df.loc[[int(client_id)]]['PA_DAYS_TOT_DURATION__mean'].values[0]
 PA_DAYS_FIRST_DUE__min = df.loc[[int(client_id)]]['PA_DAYS_FIRST_DUE__min'].values[0]
@@ -121,6 +111,7 @@ CURVES['LOST']       = W1*CURVES.FN
 CURVES['GAIN']       = CURVES.EARNED - CURVES.LOST
 CURVES['MAX_GAIN']   = CURVES.EARNED + CURVES.NOT_EARNED
 
+# TAB 1 - MAIN DETAILS
 with tab1:
     tab1_left_column, tab1_right_column = st.columns([1, 2], gap="small")
     with tab1_left_column:
@@ -185,6 +176,7 @@ with tab1:
 
     # END TAB1 RIGHT COLUMN
 
+# TAB 2 - 4 HISTOGRAMS TOP 4 FEATURES
 with tab2:
     tab2_left_column, tab2_right_column = st.columns([1, 1], gap="small")
     with tab2_left_column:
@@ -212,8 +204,6 @@ with tab2:
         sns.kdeplot(data=df, x="EXT_SOURCE_3", fill=True, color='orange').set(title='Dist EXT_SOURCE_3')
         plt.axvline(x=EXT_SOURCE_3, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-
-
     # END TAB2 LEFT COLUMN
 
     # RIGHT COLUMN
@@ -232,22 +222,27 @@ with tab2:
         sns.kdeplot(data=df, x="AMT_CREDIT", fill=True, color='yellow').set(title='Dist AMT_CREDIT')
         plt.axvline(x=AMT_CREDIT, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-
     # END TAB2 RIGHT COLUMN
 
+# TAB 3 - 4 HISTOGRAMS NEXT 4 FEATURES
 with tab3:
     tab3_left_column, tab3_right_column = st.columns([1, 1], gap="small")
     with tab3_left_column:
 
-        
-        #'Max PA_PrLI_DELAY_DAYS_INSTALMENT', round(PA_PrLI_DELAY_DAYS_INSTALMENT__max__max,4)
-        #fig = plt.figure(figsize=(6, 4))
-        #sns.kdeplot(data=df, x="PA_PrLI_DELAY_DAYS_INSTALMENT__max__max", fill=True, color='yellow').set(title='Dist Max PA_PrLI_DELAY_DAYS_INSTALMENT')
-        #plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
-        #st.pyplot(fig)
+        st.subheader('PA_PrLI_DELAY_DAYS_INSTALMENT__max__max')
+        'Value:', round(PA_PrLI_DELAY_DAYS_INSTALMENT__max__max,4)
+        fig = plt.figure(figsize=(6, 4))
+        sns.kdeplot(data=df, x="PA_PrLI_DELAY_DAYS_INSTALMENT__max__max", fill=True, color='blue').set(title='Dist Max PA_PrLI_DELAY_DAYS_INSTALMENT')
+        plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
+        st.pyplot(fig)
 
-        'FEATURE 5 GRAPH PLACEHOLDER','Something'
-        'FEATURE 6 GRAPH PLACEHOLDER','Something'
+        st.subheader('DAYS_EMPLOYED_PERC')
+        'Value:', round(DAYS_EMPLOYED_PERC,4)
+        fig = plt.figure(figsize=(6, 4))
+        sns.kdeplot(data=df, x="DAYS_EMPLOYED_PERC", fill=True, color='orange').set(title='Dist DAYS_EMPLOYED_PERC')
+        plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
+        st.pyplot(fig)
+
     # END TAB3 LEFT COLUMN
     with tab3_right_column:
         'FEATURE 7 GRAPH PLACEHOLDER','Something'
