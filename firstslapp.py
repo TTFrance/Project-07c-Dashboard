@@ -66,7 +66,7 @@ dictionary = {'A: Low': ['226060', '310013'], 'B: Medium': ['324973', '449031'],
 
 
 sidebar = st.sidebar
-tab1, tab2, tab3 = st.tabs(["Client Basic Info", "Main Feature Distributions", "Extra"])
+tab1, tab2, tab3 = st.tabs(["Client Basic Info", "Main Features", "Other Features"])
 
 with sidebar:
     st.title('Client Loan Default')
@@ -199,13 +199,15 @@ with tab2:
         # Plot!
         #st.plotly_chart(fig, use_container_width=True)
 
-        'EXT_SOURCE_2', round(EXT_SOURCE_2,4)
+        st.subheader('EXT_SOURCE_2')
+        'Value:', round(EXT_SOURCE_2,4)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="EXT_SOURCE_2", fill=True, color='blue').set(title='Dist EXT_SOURCE_2')
         plt.axvline(x=EXT_SOURCE_2, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
 
-        'EXT_SOURCE_3', round(EXT_SOURCE_3,4)
+        st.subheader('EXT_SOURCE_3')
+        'Value:', round(EXT_SOURCE_3,4)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="EXT_SOURCE_3", fill=True, color='orange').set(title='Dist EXT_SOURCE_3')
         plt.axvline(x=EXT_SOURCE_3, color='red', linestyle='--', linewidth=2, alpha=0.5)
@@ -217,13 +219,15 @@ with tab2:
     # RIGHT COLUMN
     with tab2_right_column:
 
-        'PAYMENT_RATE', round(PAYMENT_RATE,4)
+        st.subheader('PAYMENT_RATE')
+        'Value:', round(PAYMENT_RATE,4)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="PAYMENT_RATE", fill=True, color='green').set(title='Dist PAYMENT_RATE')
         plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
 
-        'AMT_CREDIT', round(AMT_CREDIT,4)
+        st.subheader('AMT_CREDIT')
+        'Value:', round(AMT_CREDIT,4)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="AMT_CREDIT", fill=True, color='yellow').set(title='Dist AMT_CREDIT')
         plt.axvline(x=AMT_CREDIT, color='red', linestyle='--', linewidth=2, alpha=0.5)
@@ -242,10 +246,11 @@ with tab3:
         #plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
         #st.pyplot(fig)
 
-        'GRAPH 6 PLACEHOLDER','Something'
+        'FEATURE 5 GRAPH PLACEHOLDER','Something'
+        'FEATURE 6 GRAPH PLACEHOLDER','Something'
     # END TAB3 LEFT COLUMN
     with tab3_right_column:
-        'GRAPH 7 PLACEHOLDER','Something'
-        'GRAPH 8 PLACEHOLDER','Something'
+        'FEATURE 7 GRAPH PLACEHOLDER','Something'
+        'FEATURE 8 GRAPH PLACEHOLDER','Something'
     # END TAB3 RIGHT COLUMN
     
