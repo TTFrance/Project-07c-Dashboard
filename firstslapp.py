@@ -176,8 +176,10 @@ with tab1:
     st.set_option('deprecation.showPyplotGlobalUse', False)
 
     # TEST REMOVAL OF THESE LINES TO SEE IF ERROR PERSISTS ON LIVE
-    matplotlib.use('TkAgg')
-    fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
+
+    st_shap(shap.plots.waterfall(shap_values[pos_num], max_display=9))
+
+    #fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
     #st.pyplot(fig, matplotlib=True)
 
     st.success('**The Local Explanation:** \
