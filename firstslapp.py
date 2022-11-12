@@ -9,6 +9,7 @@ Here's our first attempt at using data to create a table:
 import joblib
 import json
 import matplotlib.pyplot as plt
+import matplotlib
 import numpy as np
 import os
 import pandas as pd
@@ -175,7 +176,8 @@ with tab1:
     st.set_option('deprecation.showPyplotGlobalUse', False)
 
     # TEST REMOVAL OF THESE LINES TO SEE IF ERROR PERSISTS ON LIVE
-    #fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
+    matplotlib.use('TkAgg')
+    fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
     #st.pyplot(fig, matplotlib=True)
 
     st.success('**The Local Explanation:** \
