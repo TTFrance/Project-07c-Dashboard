@@ -17,7 +17,7 @@ import requests
 import seaborn as sns
 import shap
 import streamlit as st
-import streamlit_shap as st_shap
+from streamlit_shap import st_shap
 import sys
 # import streamlit.components.v1 as components
 
