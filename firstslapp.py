@@ -173,8 +173,11 @@ with tab1:
     explainer = shap.Explainer(model, X)
     shap_values = explainer(X)
     st.set_option('deprecation.showPyplotGlobalUse', False)
-    fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
-    st.pyplot(fig, matplotlib=True)
+
+    # TEST REMOVAL OF THESE LINES TO SEE IF ERROR PERSISTS ON LIVE
+    #fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
+    #st.pyplot(fig, matplotlib=True)
+
     st.success('**The Local Explanation:** \
         \n\nThis shows the effect that each feature has on a single prediction in the model. \
         \n\nThe bottom of a waterfall plot starts as the expected value of the model output,  \
