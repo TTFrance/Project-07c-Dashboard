@@ -177,7 +177,7 @@ with tab1:
 
     # TEST REMOVAL OF THESE LINES TO SEE IF ERROR PERSISTS ON LIVE
 
-    st_shap(shap.plots.waterfall(shap_values[pos_num], max_display=9), height=300)
+    st_shap(shap.plots.waterfall(shap_values[pos_num], max_display=9))
 
     #fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
     #st.pyplot(fig, matplotlib=True)
