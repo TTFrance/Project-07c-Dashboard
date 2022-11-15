@@ -10,6 +10,8 @@ import joblib
 import json
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.lines import Line2D
+import seaborn as sb
 import numpy as np
 import os
 import pandas as pd
@@ -125,8 +127,9 @@ with sidebar:
     CURVES['GAIN']       = CURVES.EARNED - CURVES.LOST
     CURVES['MAX_GAIN']   = CURVES.EARNED + CURVES.NOT_EARNED
 
+    # SIDEBAR SHOW BASIC CLIENT DETAILS
     st.subheader('Basic Details')
-    'Default Probability', default_proba*100, "%"
+    st.markdown('Default Probability: **'+ str(default_proba*100) + '** %')
     st.markdown('Age: **'+ str(round(abs(DAYS_BIRTH)/365.25,0)) + '** Years')
     st.markdown('% Days Employed: **'+ str(round(DAYS_EMPLOYED_PERC,2)) + '**')
     if CODE_GENDER_F == 1:
@@ -153,9 +156,9 @@ with tab1:
     # tab1_left_column, tab1_right_column = st.columns([1, 2], gap="small")
     # with tab1_left_column:
     # END TAB1 LEFT COLUMN
-
     # with tab1_right_column:
-        
+    # END TAB1 RIGHT COLUMN
+
     #features = pd.DataFrame(columns=['name','importance'])
     #importance = model.feature_importances_
     #for i,v in enumerate(importance):
@@ -164,7 +167,7 @@ with tab1:
     #features = features.sort_values('importance', ascending=False).head(15) #.set_index('name')
     #fig, ax = plt.subplots()
     #ax.barh(data=features.sort_values('importance'),y='name',width='importance')
-    #fig
+    #st.pyplot(fig, matplotlib=True)
 
     # SHAP WATERFALL
     st.subheader('Local Explanation')
@@ -174,10 +177,6 @@ with tab1:
     explainer = shap.Explainer(model, X)
     shap_values = explainer(X)
     st.set_option('deprecation.showPyplotGlobalUse', False)
-
-    # TEST REMOVAL OF THESE LINES TO SEE IF ERROR PERSISTS ON LIVE
-
-    # st_shap(shap.plots.waterfall(shap_values[pos_num], max_display=9))
 
     fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
     st.pyplot(fig, matplotlib=True)
@@ -228,7 +227,7 @@ with tab1:
     plt.axvline(x=default_proba, color='red', linestyle='--', linewidth=2, alpha=0.5)
     st.pyplot(fig)
 
-    # END TAB1 RIGHT COLUMN
+
 
 # TAB 2 - 4 HISTOGRAMS TOP 4 FEATURES
 with tab2:
@@ -247,24 +246,24 @@ with tab2:
 
 
         st.subheader('EXT_SOURCE_2')
-        'Value:', round(EXT_SOURCE_2,4)
+        st.markdown('Value: <span style="color:red">**' + str(round(EXT_SOURCE_2,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="EXT_SOURCE_2", fill=True, color='blue').set(title='Dist EXT_SOURCE_2')
         plt.axvline(x=EXT_SOURCE_2, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-        plot_shap_summary_feature(shap_values[1],X,'EXT_SOURCE_2')
+        #plot_shap_summary_feature(shap_values[1],X,'EXT_SOURCE_2')
         #pos = get_feature_index('EXT_SOURCE_2',X)
         #fig = shap.summary_plot(shap_values[1][:,pos:pos+1], X.iloc[:, pos:pos+1])
         #st.pyplot(fig, matplotlib=True)
 
 
         st.subheader('EXT_SOURCE_3')
-        'Value:', round(EXT_SOURCE_3,4)
+        st.markdown('Value: <span style="color:red">**' + str(round(EXT_SOURCE_3,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="EXT_SOURCE_3", fill=True, color='orange').set(title='Dist EXT_SOURCE_3')
         plt.axvline(x=EXT_SOURCE_3, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-        plot_shap_summary_feature(shap_values[1],X,'EXT_SOURCE_3')
+        #plot_shap_summary_feature(shap_values[1],X,'EXT_SOURCE_3')
 
     # END TAB2 LEFT COLUMN
 
@@ -272,44 +271,89 @@ with tab2:
     with tab2_right_column:
 
         st.subheader('PAYMENT_RATE')
-        'Value:', round(PAYMENT_RATE,4)
+        st.markdown('Value: <span style="color:red">**' + str(round(PAYMENT_RATE,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="PAYMENT_RATE", fill=True, color='green').set(title='Dist PAYMENT_RATE')
         plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-        plot_shap_summary_feature(shap_values[1],X,'PAYMENT_RATE')
+        #plot_shap_summary_feature(shap_values[1],X,'PAYMENT_RATE')
 
         st.subheader('AMT_CREDIT')
-        'Value:', round(AMT_CREDIT,4)
+        st.markdown('Value: <span style="color:red">**' + str(round(AMT_CREDIT,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="AMT_CREDIT", fill=True, color='yellow').set(title='Dist AMT_CREDIT')
         plt.axvline(x=AMT_CREDIT, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-        plot_shap_summary_feature(shap_values[1],X,'AMT_CREDIT')
+        #plot_shap_summary_feature(shap_values[1],X,'AMT_CREDIT')
     # END TAB2 RIGHT COLUMN
 
 # TAB 3 - 4 HISTOGRAMS NEXT 4 FEATURES
 with tab3:
+    st.subheader('Feature Comparison - Actual Values')
     tab3_left_column, tab3_right_column = st.columns([1, 1], gap="small")
+    df_shap_values = pd.DataFrame(data=shap_values[1],columns=df.drop(columns=['TARGET']).columns)
+    df_feature_importance = pd.DataFrame(columns=['feature','importance'])
+    for col in df_shap_values.columns:
+        importance = df_shap_values[col].abs().mean()
+        df_feature_importance.loc[len(df_feature_importance)] = [col,importance]
+    df_feature_importance = df_feature_importance.sort_values('importance',ascending=False)
+    top_10_features = df_feature_importance.feature.head(10).to_list()
     with tab3_left_column:
-
-        st.subheader('PA_PrLI_DELAY_DAYS_INSTALMENT__max__max')
-        'Value:', round(PA_PrLI_DELAY_DAYS_INSTALMENT__max__max,4)
-        fig = plt.figure(figsize=(6, 4))
-        sns.kdeplot(data=df, x="PA_PrLI_DELAY_DAYS_INSTALMENT__max__max", fill=True, color='blue').set(title='Dist Max PA_PrLI_DELAY_DAYS_INSTALMENT')
-        plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
-        st.pyplot(fig)
-
-        st.subheader('DAYS_EMPLOYED_PERC')
-        'Value:', round(DAYS_EMPLOYED_PERC,4)
-        fig = plt.figure(figsize=(6, 4))
-        sns.kdeplot(data=df, x="DAYS_EMPLOYED_PERC", fill=True, color='orange').set(title='Dist DAYS_EMPLOYED_PERC')
-        plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
-        st.pyplot(fig)
-
-    # END TAB3 LEFT COLUMN
+        featureX = st.selectbox('Select X Feature:', top_10_features)
     with tab3_right_column:
-        'FEATURE 7 GRAPH PLACEHOLDER','Something'
-        'FEATURE 8 GRAPH PLACEHOLDER','Something'
-    # END TAB3 RIGHT COLUMN
-    
+        featureY = st.selectbox('Select Y Feature:', top_10_features)
+
+    if featureX == featureY:
+        st.warning('**Warning -** Comparison features are the same, KDE will not be shown.')
+    # scatter of the two features
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(1,1,1)
+
+    # add single point for the chosen client
+    df2 = df.index.to_frame().reset_index(drop=True)
+    pos_num = df2[df2['SK_ID_CURR'] == int(client_id)].index
+
+    cm = df.TARGET.map({0: 'green', 1: 'blue'})
+    ax.scatter(data=df, x=featureX, y=featureY, s=0.5, c=cm) # c='yellow'
+    if featureX != featureY:
+        sb.kdeplot(data=df, x=featureX, y=featureY)
+    ax.scatter(data=df.iloc[pos_num], x=featureX, y=featureY, c='red', s=20, marker='o')
+    ax.set_xlabel(featureX)
+    ax.set_ylabel(featureY)
+    custom = [
+                Line2D([], [], marker='.', markersize=5, color='red', linestyle='None'),
+                Line2D([], [], marker='.', markersize=5, color='blue', linestyle='None')
+            ]
+    fig.subplots_adjust(right=0.8)
+    plt.title('Actual Feature Values, Client ' + client_id)
+    ax.legend(custom, ['Client', 'Others'], loc='center left', fontsize=12, bbox_to_anchor=(0.8, 0.5), bbox_transform=fig.transFigure)
+    st.pyplot(fig)
+
+    # NEW LAYOUT
+    st.subheader('Feature Comparison - SHAP Values')
+    fig = plt.figure(figsize=(12, 8))
+    top_left = fig.add_subplot(2,2,1)
+    top_left.xaxis.set_label_position('top') 
+    top_left.set_xlabel(featureX)    
+    top_left.set_ylabel(featureY)    
+    top_left.scatter(data=df_shap_values, x=featureX, y=featureY, s=1, marker='.')
+    top_left.scatter(data=df_shap_values.iloc[pos_num], x=featureX, y=featureY, c='red', s=10, marker='D')
+    if featureX != featureY:
+        sb.kdeplot(ax=top_left,data=df_shap_values, x=featureX, y=featureY)
+
+    top_right = fig.add_subplot(2,2,2)
+    # top_right.hist(df_shap_values[featureY], orientation="horizontal", bins=50)
+    sb.kdeplot(ax=top_right, data=df_shap_values, y=featureY)
+    top_right.axhline(y=df_shap_values.iloc[pos_num][featureY].values[0]
+        , color='red', linestyle='--', linewidth=1, alpha=0.5)
+
+    bot_left = fig.add_subplot(2,2,3)
+    sb.kdeplot(ax=bot_left, data=df_shap_values, x=featureX)
+    bot_left.axvline(x=df_shap_values.iloc[pos_num][featureX].values[0]
+        , color='red', linestyle='--', linewidth=1, alpha=0.5)
+    # bot_left.hist(df_shap_values[featureX], bins=50)
+
+    fig.suptitle('SHAP Feature Values, Client ' + client_id)
+    st.pyplot(fig)
+
+
