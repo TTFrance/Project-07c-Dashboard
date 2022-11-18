@@ -24,7 +24,7 @@ import sys
 # import streamlit.components.v1 as components
 
 # STREAMLIT WIDTH CONFIG
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", page_title='Loan Credit Default Risk, Adam Phillips', page_icon = 'favicon.ico')
 
 # PATH TO BE ABLE TO PICK UP ENV VARIABLE 'OCP7_API_URL'
 sys.path.append(".")
