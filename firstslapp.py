@@ -46,7 +46,7 @@ model = joblib.load('model/best_LGB_10k_Undersampled_BestParams.pkl')
 predict_url_slug = base_api_url + "predict/"
 
 # DATA FOR GRAPHING
-df = pd.read_pickle('data/client_data_api_dashboard_1k.pkl')
+df = pd.read_pickle('data/client_data_api_dashboard_1k_500g_500b.pkl')
 
 # LOAD CURVES FOR PROFIT / LOSS
 CURVES = pd.read_pickle('data/curves.pkl')
@@ -164,7 +164,7 @@ with tab1:
     #ax.barh(data=features.sort_values('importance'),y='name',width='importance')
     #st.pyplot(fig, matplotlib=True)
 
-    tab1_1, tab1_2, tab1_3 = st.tabs(["Local Explanation", "Global Feature Importance", "Risk Thresholds"])
+    tab1_1, tab1_2, tab1_3 = st.tabs(["Analyse individuelle", "Analyse globale", "Risk Thresholds"])
 
     # SHAP WATERFALL
     with tab1_1:
@@ -212,7 +212,7 @@ with tab1:
         # DO NOT TOUCH THIS
         # DO NOT TOUCH THIS
         # -----------------
-        st.success('**To interpret a SHAP model explainer**: \n\n Higher feature values are in red, \
+        st.success('**Global Feature Importance**: \n\n Higher feature values are in red, \
             lower are in blue. Taking EXT_SOURCE_2 as an example we can see that higher values \
             result in a bigger negative effect on the model prediction (probability of default). \
             \n\n Therefore clients with higher EXT_SOURCE_2 values are less likely to default.')
@@ -333,11 +333,12 @@ with tab2:
         df_feature_importance.loc[len(df_feature_importance)] = [col,importance]
     df_feature_importance = df_feature_importance.sort_values('importance',ascending=False)
     top_10_features = df_feature_importance.feature.head(10).to_list()
+    default_ix = top_10_features.index('EXT_SOURCE_3')
     tab2_left_column, tab2_right_column = st.columns([1, 1], gap="small")
     with tab2_left_column:
         featureX = st.selectbox('Select X Feature:', top_10_features)
     with tab2_right_column:
-        featureY = st.selectbox('Select Y Feature:', top_10_features)
+        featureY = st.selectbox('Select Y Feature:', top_10_features, index=default_ix)
 
     if featureX == featureY:
         st.warning('**Warning -** Comparison features are the same, KDE will not be shown.')
@@ -349,20 +350,29 @@ with tab2:
     df2 = df.index.to_frame().reset_index(drop=True)
     pos_num = df2[df2['SK_ID_CURR'] == int(client_id)].index
 
-    cm = df.TARGET.map({0: 'green', 1: 'blue'})
+    cm = df.TARGET.map({0: 'green', 1: 'red'})
+    p = {0: "green", 1: "red"}
     ax.scatter(data=df, x=featureX, y=featureY, s=0.5, c=cm) # c='yellow'
     if featureX != featureY:
-        sb.kdeplot(data=df, x=featureX, y=featureY)
-    ax.scatter(data=df.iloc[pos_num], x=featureX, y=featureY, c='red', s=20, marker='o')
+        sb.kdeplot(data=df, x=featureX, y=featureY, hue='TARGET', palette=p)
+    ax.scatter(data=df.iloc[pos_num], x=featureX, y=featureY, c='black', s=20, marker='o')
+    ax.annotate('CLIENT',
+                xy=(df.iloc[pos_num][featureX], df.iloc[pos_num][featureY]), xycoords='data', color='black',
+                xytext=(-25, 25), textcoords='offset points',
+                arrowprops=dict(width=3, facecolor='black', shrink=0.05),
+                horizontalalignment='right', verticalalignment='bottom')
+
+
     ax.set_xlabel(featureX)
     ax.set_ylabel(featureY)
     custom = [
+                Line2D([], [], marker='.', markersize=5, color='green', linestyle='None'),
                 Line2D([], [], marker='.', markersize=5, color='red', linestyle='None'),
-                Line2D([], [], marker='.', markersize=5, color='blue', linestyle='None')
+                Line2D([], [], marker='.', markersize=5, color='black', linestyle='None')
             ]
     fig.subplots_adjust(right=0.8)
     plt.title('Actual Feature Values, Client ' + client_id)
-    ax.legend(custom, ['Client', 'Others'], loc='center left', fontsize=12, bbox_to_anchor=(0.8, 0.5), bbox_transform=fig.transFigure)
+    ax.legend(custom, ['No default', 'Default','Client'], loc='center left', fontsize=12, bbox_to_anchor=(0.8, 0.5), bbox_transform=fig.transFigure)
     st.pyplot(fig)
 
     # NEW LAYOUT
