@@ -62,7 +62,7 @@ dictionary = {'A: Low': ['226060', '310013'], 'B: Medium': ['324973', '449031'],
 sidebar = st.sidebar
 
 # CREATE MAIN TABS
-tab1, tab2, tab3 = st.tabs(["Explanations", "Feature Scatterplots", "Main Features"])
+tab1, tab2, tab3 = st.tabs(["Explications", "Analyse bivariée", "Caractéristiques principales"])
 
 # functions
 def plot_shap_summary_feature(shap_values,X,feature_name):
@@ -129,25 +129,64 @@ with sidebar:
     CURVES['MAX_GAIN']   = CURVES.EARNED + CURVES.NOT_EARNED
 
     # SIDEBAR SHOW BASIC CLIENT DETAILS
-    st.subheader('Basic Details')
-    st.markdown('Default Probability: **'+ str(default_proba*100) + '** %')
-    st.markdown('Age: **'+ str(round(abs(DAYS_BIRTH)/365.25,0)) + '** Years')
-    st.markdown('% Days Employed: **'+ str(round(DAYS_EMPLOYED_PERC,2)) + '**')
-    if CODE_GENDER_F == 1:
-        st.markdown('Sex: **Female**')
-    else:
-        st.markdown('Sex: **Male**')
-    if NAME_EDUCATION_TYPE_Highereducation == 1:
-        st.markdown('Higher Education: **Yes**')
-    else:
-        st.markdown('Higher Education: **No**')
-    if NAME_FAMILY_STATUS_Married == 1:
-        st.markdown('Marital Status: **Married**')
-    else:
-        st.markdown('Marital Status: **Not Married**')
+    st.subheader('Principales valeurs caractéristiques')
+    #st.markdown('Default Probability: **'+ str(default_proba*100) + '** %')
+    #st.markdown('Age: **'+ str(round(abs(DAYS_BIRTH)/365.25,0)) + '** Years')
+    #st.markdown('% Days Employed: **'+ str(round(DAYS_EMPLOYED_PERC,2)) + '**')
+    #if CODE_GENDER_F == 1:
+    #    st.markdown('Sex: **Female**')
+    #else:
+    #    st.markdown('Sex: **Male**')
+    #if NAME_EDUCATION_TYPE_Highereducation == 1:
+    #    st.markdown('Higher Education: **Yes**')
+    #else:
+    #    st.markdown('Higher Education: **No**')
+    #if NAME_FAMILY_STATUS_Married == 1:
+    #    st.markdown('Marital Status: **Married**')
+    #else:
+    #    st.markdown('Marital Status: **Not Married**')
+
+    t = pd.DataFrame(data={
+        'Feature': [
+            'Probabilité de défaut (%)',
+            'Âge (ans)',
+            '% Jours travaillés',
+            'Sexe',
+            'L`\'enseignement supérieur',
+            'État civil',
+        ], 
+        'Value': [
+            str(default_proba*100) + ' %',
+            str(round(abs(DAYS_BIRTH)/365.25,0)),
+            str(round(DAYS_EMPLOYED_PERC,2)),
+            'Femelle' if CODE_GENDER_F == 1 else 'Mâle',
+            'Oui' if NAME_EDUCATION_TYPE_Highereducation == 1 else 'Non',
+            'Marié(e)' if NAME_FAMILY_STATUS_Married == 1 else 'Pas marié(e)',
+        ]})
+
+    hide_table_row_index = """
+            <style>
+            table thead tr th { font-weight : 700; color: rgba(0, 0, 0, 1.0)}
+            thead tr th:first-child {display:none}
+            tbody th {display:none}
+            table td { border-style : hidden!important; }
+            table th { border-style : hidden!important }
+            </style>
+            """
+    hide_table_row_index = """
+            <style>
+            thead tr th:first-child {display:none}
+            tbody th {display:none}
+            </style>
+            """
+
+    # Inject CSS with Markdown
+    st.markdown(hide_table_row_index, unsafe_allow_html=True)
+    
+    st.table(t)
 
     # SHOW API USED
-    'USING API', base_api_url+'docs'
+    'API:', base_api_url+'docs'
 
     # END SIDEBAR
 
@@ -164,11 +203,11 @@ with tab1:
     #ax.barh(data=features.sort_values('importance'),y='name',width='importance')
     #st.pyplot(fig, matplotlib=True)
 
-    tab1_1, tab1_2, tab1_3 = st.tabs(["Analyse individuelle", "Analyse globale", "Risk Thresholds"])
+    tab1_1, tab1_2, tab1_3 = st.tabs(["Analyse individuelle", "Analyse globale", "Seuils de risque"])
 
     # SHAP WATERFALL
     with tab1_1:
-        st.subheader('Local Explanation')
+        st.subheader('Explication locale')
         X = df.drop(columns=['TARGET'])
         df2 = df.index.to_frame().reset_index(drop=True)
         pos_num = df2[df2['SK_ID_CURR'] == int(client_id)].index[0]
@@ -179,7 +218,7 @@ with tab1:
         fig = shap.plots.waterfall(shap_values[pos_num], max_display=9)
         st.pyplot(fig, matplotlib=True)
 
-        st.success('**The Local Explanation:** \
+        st.success('**Explication locale:** \
             \n\nThis shows the effect that each feature has on a single prediction in the model. \
             \n\nThe bottom of a waterfall plot starts as the expected value of the model output,  \
             and then each row shows how the positive (red) or negative (blue) contribution of each  \
@@ -190,7 +229,7 @@ with tab1:
 
 
     with tab1_2:
-        st.subheader('Global Feature Importance')
+        st.subheader('Importance globale des caractéristiques')
         # -----------------
         # SHAP
         # DO NOT TOUCH THIS
@@ -212,13 +251,13 @@ with tab1:
         # DO NOT TOUCH THIS
         # DO NOT TOUCH THIS
         # -----------------
-        st.success('**Global Feature Importance**: \n\n Higher feature values are in red, \
+        st.success('**Importance globale des caractéristiques**: \n\n Higher feature values are in red, \
             lower are in blue. Taking EXT_SOURCE_2 as an example we can see that higher values \
             result in a bigger negative effect on the model prediction (probability of default). \
             \n\n Therefore clients with higher EXT_SOURCE_2 values are less likely to default.')
 
     with tab1_3:
-        st.subheader('Risk Thresholds')
+        st.subheader('Seuils de risque')
         # GAIN / LOSS CURVES GRAPH
         #st.subheader('Gain / Loss Curves')
         #fig, ax = plt.subplots(figsize =(10, 6))
@@ -228,20 +267,20 @@ with tab1:
 
         # CURVES NEW
         risk = st.selectbox(
-            'Select your acceptable level of risk:',
-            ('Low', 'Medium', 'High')
+            'Sélectionnez votre niveau de risque acceptable:',
+            ('Bas', 'Moyen', 'Elevé')
         )
 
-        risk_medium_lower = 0.360
-        risk_medium_upper = 0.565
-        risk_band = 0.2
+        risk_medium_lower = 0.210
+        risk_medium_upper = 0.360
+        risk_band = 0.1
 
-        risk_graph_title = 'Client placement within risk thresholds'
+        risk_graph_title = 'Placement du client dans les seuils de risque'
 
-        if risk == 'Medium':
+        if risk == 'Moyen':
             risk_lower = risk_medium_lower
             risk_upper = risk_medium_upper
-        elif risk == 'Low':
+        elif risk == 'Bas':
             risk_lower = risk_medium_lower - risk_band
             risk_upper = risk_medium_upper - risk_band
         else: # risk == high:
@@ -261,32 +300,33 @@ with tab1:
         W1 =  599026  #
         ax.plot([0, 1],[-W0, -W0], ':')
         ax.set_xlim(0,1)
+        ax.set_ylim(-55000,0)
         ax.legend(loc='lower left')
 
         plt.axvline(x=default_proba, ymin=0, ymax=1, color='black', linestyle='--', linewidth=1, alpha=0.4)
         plt.axvline(x=risk_lower, ymin=0, ymax=1, color='green', linestyle='--', linewidth=1, alpha=0.4)
         plt.axvline(x=risk_upper, ymin=0, ymax=1, color='darkred', linestyle='--', linewidth=1, alpha=0.4)
 
-        ax.annotate('low risk threshold',
+        ax.annotate('seuil de risque bas',
                     xy=(risk_lower, -40000), xycoords='data', color='green',
                     xytext=(-15, 25), textcoords='offset points',
                     arrowprops=dict(facecolor='green', shrink=0.05),
                     horizontalalignment='right', verticalalignment='bottom')
 
-        ax.annotate('high risk threshold',
+        ax.annotate('seuil de risque elevé',
                     xy=(risk_upper, -40000), xycoords='data', color='darkred',
                     xytext=(15, 25), textcoords='offset points',
                     arrowprops=dict(facecolor='darkred', shrink=0.05),
                     horizontalalignment='left', verticalalignment='bottom')
 
-        ax.annotate('client probability of default',
+        ax.annotate('probabilité de défaut du client',
                     xy=(default_proba, -30000), xycoords='data', color='black',
                     xytext=(-15, 25), textcoords='offset points',
                     arrowprops=dict(facecolor='black', shrink=0.05),
                     horizontalalignment='right', verticalalignment='bottom')
 
         plt.suptitle(risk_graph_title)
-        st.pyplot(fig)
+        st.pyplot(fig, matplotlib=True)
 
         # in which category is the client regarding the currently selected risk?
         if default_proba <= risk_lower:
@@ -295,12 +335,10 @@ with tab1:
             risk_client = 'High'
         else:
             risk_client = 'Medium'
-
         base_text = 'The green line is low risk threshold. \
                     Above the red line is high risk threshold. \
                     Inbetween the green and red lines is medium risk band. \
                     \n\nThe black line is the clients calculated probability of default.\n\n'
-
         if risk_client == 'Medium':
             extra_text = 'This client falls into the band of **medium** risk and you should \
                 study the clients values for the most important features as shown in \
@@ -316,67 +354,60 @@ with tab1:
                 rejected with no further manual analysis, however please take a moment to \
                 study the clients values for the most important features as shown in \
                 the 2nd and 3rd tabs, to make sure you agree with this recommendation.'
-
         risk_explanation_text = base_text + extra_text
-
         st.success(risk_explanation_text)
 
 
 
-# TAB 2 - 4 HISTOGRAMS TOP 4 FEATURES
+# TAB 2
 with tab2:
-    st.subheader('Feature Comparison - Actual Values')
+    st.subheader('Analyse bivariée - Valeurs réelles')
     df_shap_values = pd.DataFrame(data=shap_values[1],columns=df.drop(columns=['TARGET']).columns)
     df_feature_importance = pd.DataFrame(columns=['feature','importance'])
     for col in df_shap_values.columns:
         importance = df_shap_values[col].abs().mean()
         df_feature_importance.loc[len(df_feature_importance)] = [col,importance]
     df_feature_importance = df_feature_importance.sort_values('importance',ascending=False)
-    top_10_features = df_feature_importance.feature.head(10).to_list()
+    top_10_features = df_feature_importance.feature.head(20).to_list()
     default_ix = top_10_features.index('EXT_SOURCE_3')
     tab2_left_column, tab2_right_column = st.columns([1, 1], gap="small")
     with tab2_left_column:
-        featureX = st.selectbox('Select X Feature:', top_10_features)
+        featureX = st.selectbox('Sélectionnez X:', top_10_features)
     with tab2_right_column:
-        featureY = st.selectbox('Select Y Feature:', top_10_features, index=default_ix)
-
+        featureY = st.selectbox('Sélectionnez Y:', top_10_features, index=default_ix)
     if featureX == featureY:
-        st.warning('**Warning -** Comparison features are the same, KDE will not be shown.')
+        st.warning('**Attention -** Les X et Y sont les mêmes, le KDE ne sera pas affiché.')
     # scatter of the two features
     fig = plt.figure(figsize=(12, 8))
     ax = fig.add_subplot(1,1,1)
-
     # add single point for the chosen client
     df2 = df.index.to_frame().reset_index(drop=True)
     pos_num = df2[df2['SK_ID_CURR'] == int(client_id)].index
-
     cm = df.TARGET.map({0: 'green', 1: 'red'})
     p = {0: "green", 1: "red"}
     ax.scatter(data=df, x=featureX, y=featureY, s=0.5, c=cm) # c='yellow'
     if featureX != featureY:
-        sb.kdeplot(data=df, x=featureX, y=featureY, hue='TARGET', palette=p)
+        sb.kdeplot(data=df, x=featureX, y=featureY, hue='TARGET', palette=p, alpha=0.3, fill=True)
     ax.scatter(data=df.iloc[pos_num], x=featureX, y=featureY, c='black', s=20, marker='o')
-    ax.annotate('CLIENT',
+    ax.annotate('CLIENT(E)',
                 xy=(df.iloc[pos_num][featureX], df.iloc[pos_num][featureY]), xycoords='data', color='black',
                 xytext=(-25, 25), textcoords='offset points',
                 arrowprops=dict(width=3, facecolor='black', shrink=0.05),
                 horizontalalignment='right', verticalalignment='bottom')
-
-
     ax.set_xlabel(featureX)
     ax.set_ylabel(featureY)
     custom = [
-                Line2D([], [], marker='.', markersize=5, color='green', linestyle='None'),
-                Line2D([], [], marker='.', markersize=5, color='red', linestyle='None'),
-                Line2D([], [], marker='.', markersize=5, color='black', linestyle='None')
+                Line2D([], [], marker='.', markersize=15, color='green', linestyle='None'),
+                Line2D([], [], marker='.', markersize=15, color='red', linestyle='None'),
+                Line2D([], [], marker='.', markersize=15, color='black', linestyle='None')
             ]
     fig.subplots_adjust(right=0.8)
-    plt.title('Actual Feature Values, Client ' + client_id)
-    ax.legend(custom, ['No default', 'Default','Client'], loc='center left', fontsize=12, bbox_to_anchor=(0.8, 0.5), bbox_transform=fig.transFigure)
+    plt.title('Valeurs réelles, Client(e) ' + client_id)
+    ax.legend(custom, ['Aucun défaut', 'Défaut','Client(e)'], loc='center left', fontsize=12, bbox_to_anchor=(0.8, 0.5), bbox_transform=fig.transFigure)
     st.pyplot(fig)
 
     # NEW LAYOUT
-    st.subheader('Feature Comparison - SHAP Values')
+    st.subheader('Analyse bivariée - SHAP Values')
     fig = plt.figure(figsize=(12, 8))
     top_left = fig.add_subplot(2,2,1)
     top_left.xaxis.set_label_position('top') 
@@ -386,40 +417,25 @@ with tab2:
     top_left.scatter(data=df_shap_values.iloc[pos_num], x=featureX, y=featureY, c='red', s=10, marker='D')
     if featureX != featureY:
         sb.kdeplot(ax=top_left,data=df_shap_values, x=featureX, y=featureY)
-
     top_right = fig.add_subplot(2,2,2)
     # top_right.hist(df_shap_values[featureY], orientation="horizontal", bins=50)
     sb.kdeplot(ax=top_right, data=df_shap_values, y=featureY)
     top_right.axhline(y=df_shap_values.iloc[pos_num][featureY].values[0]
         , color='red', linestyle='--', linewidth=1, alpha=0.5)
-
     bot_left = fig.add_subplot(2,2,3)
     sb.kdeplot(ax=bot_left, data=df_shap_values, x=featureX)
     bot_left.axvline(x=df_shap_values.iloc[pos_num][featureX].values[0]
         , color='red', linestyle='--', linewidth=1, alpha=0.5)
     # bot_left.hist(df_shap_values[featureX], bins=50)
-
-    fig.suptitle('SHAP Feature Values, Client ' + client_id)
+    fig.suptitle('SHAP Feature Values, Client(e) ' + client_id)
     st.pyplot(fig)
 
 # TAB 3 - 4 HISTOGRAMS 4 FEATURES
 with tab3:
     tab3_left_column, tab3_right_column = st.columns([1, 1], gap="small")
     with tab3_left_column:
-
-        # Group data together
-        #EXT_SOURCE_2_data = df.EXT_SOURCE_2.values
-        #EXT_SOURCE_2_data2 = []
-        #EXT_SOURCE_2_data2.append(EXT_SOURCE_2_data)
-        #group_labels = ['EXT_SOURCE_2']
-        # Create distplot with custom bin_size
-        #fig = ff.create_distplot(EXT_SOURCE_2_data2, group_labels, bin_size=[.05])
-        # Plot!
-        #st.plotly_chart(fig, use_container_width=True)
-
-
         st.subheader('EXT_SOURCE_2')
-        st.markdown('Value: <span style="color:red">**' + str(round(EXT_SOURCE_2,4)) + '**</span>', unsafe_allow_html=True)
+        st.markdown('Valeur réelle: <span style="color:red">**' + str(round(EXT_SOURCE_2,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="EXT_SOURCE_2", fill=True, color='blue').set(title='Dist EXT_SOURCE_2')
         plt.axvline(x=EXT_SOURCE_2, color='red', linestyle='--', linewidth=2, alpha=0.5)
@@ -429,35 +445,29 @@ with tab3:
         #fig = shap.summary_plot(shap_values[1][:,pos:pos+1], X.iloc[:, pos:pos+1])
         #st.pyplot(fig, matplotlib=True)
 
-
         st.subheader('EXT_SOURCE_3')
-        st.markdown('Value: <span style="color:red">**' + str(round(EXT_SOURCE_3,4)) + '**</span>', unsafe_allow_html=True)
+        st.markdown('Valeur réelle: <span style="color:red">**' + str(round(EXT_SOURCE_3,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="EXT_SOURCE_3", fill=True, color='orange').set(title='Dist EXT_SOURCE_3')
         plt.axvline(x=EXT_SOURCE_3, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-        #plot_shap_summary_feature(shap_values[1],X,'EXT_SOURCE_3')
-
     # END TAB2 LEFT COLUMN
 
     # RIGHT COLUMN
     with tab3_right_column:
-
         st.subheader('PAYMENT_RATE')
-        st.markdown('Value: <span style="color:red">**' + str(round(PAYMENT_RATE,4)) + '**</span>', unsafe_allow_html=True)
+        st.markdown('Valeur réelle: <span style="color:red">**' + str(round(PAYMENT_RATE,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="PAYMENT_RATE", fill=True, color='green').set(title='Dist PAYMENT_RATE')
         plt.axvline(x=PAYMENT_RATE, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-        #plot_shap_summary_feature(shap_values[1],X,'PAYMENT_RATE')
 
         st.subheader('AMT_CREDIT')
-        st.markdown('Value: <span style="color:red">**' + str(round(AMT_CREDIT,4)) + '**</span>', unsafe_allow_html=True)
+        st.markdown('Valeur réelle: <span style="color:red">**' + str(round(AMT_CREDIT,4)) + '**</span>', unsafe_allow_html=True)
         fig = plt.figure(figsize=(6, 4))
         sns.kdeplot(data=df, x="AMT_CREDIT", fill=True, color='yellow').set(title='Dist AMT_CREDIT')
         plt.axvline(x=AMT_CREDIT, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
-        #plot_shap_summary_feature(shap_values[1],X,'AMT_CREDIT')
     # END TAB2 RIGHT COLUMN
 
 
