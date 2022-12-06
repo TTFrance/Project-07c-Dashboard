@@ -219,13 +219,13 @@ with tab1:
         st.pyplot(fig, matplotlib=True)
 
         st.success('**Explication locale:** \
-            \n\nThis shows the effect that each feature has on a single prediction in the model. \
-            \n\nThe bottom of a waterfall plot starts as the expected value of the model output,  \
-            and then each row shows how the positive (red) or negative (blue) contribution of each  \
-            feature moves the value from the expected model output over the background dataset \
-            to the model output for this prediction. \
-            \n\nA blue arrow pointing to the left moves the prediction towards being less likely of default, \
-            and a red arrow pointing to the right moves the prediction towards being more likely')
+            \n\nCela montre l\'effet que chaque caractéristique a sur une seule prédiction dans le modèle. \
+            \n\nLe bas d\'un tracé en cascade commence par la valeur attendue de la sortie du modèle, \
+            puis chaque ligne montre comment la contribution positive (rouge) ou négative (bleue) de  \
+            chaque entité déplace la valeur de la sortie attendue du modèle sur l\'ensemble de données  \
+            \'arrière-plan vers le sortie du modèle pour cette prédiction. \
+            \n\nUne flèche bleue pointant vers la gauche déplace la prédiction vers une probabilité de défaut moindre, \
+            et une flèche rouge pointant vers la droite déplace la prédiction vers une probabilité plus élevée')
 
 
     with tab1_2:
@@ -251,10 +251,11 @@ with tab1:
         # DO NOT TOUCH THIS
         # DO NOT TOUCH THIS
         # -----------------
-        st.success('**Importance globale des caractéristiques**: \n\n Higher feature values are in red, \
-            lower are in blue. Taking EXT_SOURCE_2 as an example we can see that higher values \
-            result in a bigger negative effect on the model prediction (probability of default). \
-            \n\n Therefore clients with higher EXT_SOURCE_2 values are less likely to default.')
+        st.success('**Importance globale des caractéristiques**: \
+            \n\nLes valeurs de fonctionnalité supérieures sont en rouge, les valeurs inférieures en bleu. \
+            En prenant EXT_SOURCE_2 comme exemple, nous pouvons voir que des valeurs plus élevées entraînent \
+            un effet négatif plus important sur la prédiction du modèle (probabilité de défaut). \
+            \n\nPar conséquent, les clients avec des valeurs EXT_SOURCE_2 plus élevées sont moins susceptibles d\'être par défaut.')
 
     with tab1_3:
         st.subheader('Seuils de risque')
@@ -335,25 +336,24 @@ with tab1:
             risk_client = 'High'
         else:
             risk_client = 'Medium'
-        base_text = 'The green line is low risk threshold. \
-                    Above the red line is high risk threshold. \
-                    Inbetween the green and red lines is medium risk band. \
-                    \n\nThe black line is the clients calculated probability of default.\n\n'
+        base_text = 'La ligne verte correspond au seuil de risque faible. \
+                    Au-dessus de la ligne rouge se trouve le seuil de risque élevé. \
+                    Entre les lignes vertes et rouges se trouve une bande de risque moyen. \
+                    \n\nLa ligne noire représente la probabilité de défaut calculée du client.\n\n'
         if risk_client == 'Medium':
-            extra_text = 'This client falls into the band of **medium** risk and you should \
-                study the clients values for the most important features as shown in \
-                study the clients values for the most important features as shown in \
-                the 2nd and 3rd tabs, to draw a manual conclusion on whether or not to agree the loan.'
+            extra_text = 'Ce client tombe dans la tranche de risque **moyen** et vous devriez \
+                étudier les valeurs du client pour les caractéristiques les plus importantes comme indiqué dans \
+                les 2ème et 3ème onglets, pour tirer une conclusion manuelle sur l\'accord ou non du prêt.'
         elif risk_client == 'Low':
-            extra_text = 'This client falls into the band of **low** risk and could be \
-                **accepted** with no further manual analysis, however please take a moment to \
-                study the clients values for the most important features as shown in \
-                the 2nd and 3rd tabs, to make sure you agree with this recommendation.'
+            extra_text = 'Ce client tombe dans la tranche de risque **faible** et pourrait être \
+                **accepté** sans autre analyse manuelle, mais veuillez prendre un moment pour \
+                étudier les valeurs du client pour les caractéristiques les plus importantes, comme indiqué dans \
+                les 2e et 3e onglets, pour vous assurer que vous êtes d\'accord avec cette recommandation.'
         else: # risk == high:
-            extra_text = 'This client falls into the band of **high** risk and could be \
-                rejected with no further manual analysis, however please take a moment to \
-                study the clients values for the most important features as shown in \
-                the 2nd and 3rd tabs, to make sure you agree with this recommendation.'
+            extra_text = 'Ce client tombe dans la tranche de risque **élevé** et pourrait être \
+                rejeté sans autre analyse manuelle, mais veuillez prendre un moment pour \
+                étudier les valeurs du client pour les caractéristiques les plus importantes comme indiqué dans \
+                les 2ème et 3ème onglets, pour s\'assurer que vous êtes d\'accord avec cette recommandation.'
         risk_explanation_text = base_text + extra_text
         st.success(risk_explanation_text)
 
@@ -407,7 +407,7 @@ with tab2:
     st.pyplot(fig)
 
     # NEW LAYOUT
-    st.subheader('Analyse bivariée - SHAP Values')
+    st.subheader('Analyse bivariée - l\'importance')
     fig = plt.figure(figsize=(12, 8))
     top_left = fig.add_subplot(2,2,1)
     top_left.xaxis.set_label_position('top') 
@@ -429,6 +429,18 @@ with tab2:
     # bot_left.hist(df_shap_values[featureX], bins=50)
     fig.suptitle('SHAP Feature Values, Client(e) ' + client_id)
     st.pyplot(fig)
+
+    st.success('**Distributions des valeurs des caractéristiques et d\'importance** \
+        \n\nDans le graphique du haut - Valeurs réelles, nous pouvons voir le placement du client  \
+        dans la population en fonction des valeurs des deux caractéristiques sélectionnées. \
+        \n\nDans le graphique du bas, nous voyons l\'importance de ces caractéristiques sur la prédiction \
+        du modèle pour ce client. Une valeur d\'importance supérieure à zéro augmentera positivement  \
+        la probabilité d\'un client défaillant. Une valeur inférieure à 0 diminuera cette probabilité. \
+        \n\nPar conséquent, pour détecter un client potentiellement défaillant, il convient d\'accorder  \
+        plus d\'importance à une paire de caractéristiques apparaissant en haut à droite de la  \
+        distribution qu\'en bas à gauche. \
+        \n\nLes distributions individuelles pour chaque caractéristique sélectionnée peuvent être  \
+        vues à droite et en dessous de la distribution combinée.')
 
 # TAB 3 - 4 HISTOGRAMS 4 FEATURES
 with tab3:
@@ -469,6 +481,5 @@ with tab3:
         plt.axvline(x=AMT_CREDIT, color='red', linestyle='--', linewidth=2, alpha=0.5)
         st.pyplot(fig)
     # END TAB2 RIGHT COLUMN
-
 
         
